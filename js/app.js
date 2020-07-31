@@ -18,18 +18,13 @@ function captureSuccess(s) {
 	v += "<source src='" + s[0].fullPath + "' type='video/mp4'>";
 	v += "</video>";
 	document.querySelector("#videoArea").innerHTML = v;
-	
-	var i, len;
-        for (i = 0, len = s.length; i < len; i += 1) {
-            uploadFile(s[i]);
-        }   
 }
 
 // Upload files to server
-    function uploadFile(s) {
+    function uploadFile(mediaFile) {
         var ft = new FileTransfer(),
-            path = s.fullPath,
-            name = s.name;
+            path = mediaFile.fullPath,
+            name = mediaFile.name;
 
         ft.upload(path,
             "http://alicesons.org/demos/phonegap/uploadv.php",
