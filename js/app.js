@@ -1,51 +1,50 @@
 document.addEventListener("deviceready", init, false);
-function init() {
-	
-	
-	document.querySelector("#takeVideo").addEventListener("touchend", function() {
-		console.log("Take video");
-		navigator.device.capture.captureVideo(captureSuccess, captureError, {limit: 1});
-	}, false);
-	
+
+var path = '';
+
+function captureVideo() {
+    // capture callback
+    var captureSuccess = function(mediaFiles) {
+        path = mediaFiles[0].fullPath;
+    };
+
+    // capture error callback
+    var captureError = function(error) {
+        navigator.notification.alert('Error code: ' + error.code, null, 'Capture Error');
+    };
+
+    // start video capture
+    navigator.device.capture.captureVideo(captureSuccess, captureError,  {limit:1});
 }
 
-function captureError(e) {
-	console.log("capture error: "+JSON.stringify(e));
-}
 
-function captureSuccess(s) {
-	console.log("Success");
-	console.dir(s[0]);
-	var v = "<video controls='controls'>";
-	v += "<source src='" + s[0].fullPath + "' type='video/mp4'>";
-	v += "</video>";
-	document.querySelector("#videoArea").innerHTML = v;
-	
-	
-  //here you write logic when upload button is clicked
-  $("#uploadvid").on("click",function(){
-     uploadFile(s[0]);
-  });
-}
 
-function uploadFile(mediaFile) {
+function uploadVideo() {
+    var win = function (r) {
+        console.log("Code = " + r.responseCode);
+        console.log("Response = " + r.response);
+        console.log("Sent = " + r.bytesSent);
+    }
 
-var ft = new FileTransfer(),
-    path = mediaFile.fullPath,
-    name = mediaFile.name;
-var options = new FileUploadOptions();
-options.mimeType = "documents";
-options.fileName = name;
-options.chunkedMode = true;
+    var fail = function (error) {
+        alert("An error has occurred: Code = " + error.code);
+        console.log("upload error source " + error.source);
+        console.log("upload error target " + error.target);
+    }
 
-ft.upload(path,
-    "http://www.alicesons.org/demos/phonegap/uploadv.php",
-    function(result) {
-        alert('Upload success: ' + result.responseCode);
-        alert(result.bytesSent + ' bytes sent');
-    },
-    function(error) {
-        alert('Error uploading file ' + path + ': ' + error.code);
-    },
-    options);
+    var fileURL = path;
+
+    var options = new FileUploadOptions();
+    options.fileKey = "file";
+    options.fileName = fileURL.substr(fileURL.lastIndexOf('/') + 1);
+    options.mimeType = "video/mp4";
+
+    var params = {};
+    params.value1 = "test";
+    params.value2 = "param";
+
+    options.params = params;
+
+    var ft = new FileTransfer();
+    ft.upload(fileURL, encodeURI("http://alicesons.org/demos/phonegap/uploadv.php"), win, fail, options);
 }
